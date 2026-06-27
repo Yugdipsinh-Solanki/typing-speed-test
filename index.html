@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Typing Speed Test - 3D Edition</title>
+    <style>
+        :root { --primary: #00f2fe; --secondary: #4facfe; --bg: #0a0a16; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; perspective: 1000px; }
+        
+        /* 3D Animated Toy Background Elements */
+        .toy { position: absolute; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3); animation: float 6s ease-in-out infinite; filter: blur(1px); }
+        .toy1 { width: 120px; height: 120px; top: 15%; left: 10%; animation-delay: 0s; transform: translateZ(50px); background: linear-gradient(135deg, #ff007f, #7f00ff); }
+        .toy2 { width: 80px; height: 80px; bottom: 15%; right: 10%; animation-delay: -2s; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+        .toy3 { width: 50px; height: 50px; top: 75%; left: 15%; animation-delay: -4s; background: linear-gradient(135deg, #00ff87, #60efff); }
+
+        @keyframes float { 
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); } 
+            50% { transform: translateY(-30px) rotate(180deg) scale(1.1); box-shadow: inset -15px -15px 30px rgba(0,0,0,0.6), 0 25px 30px rgba(0,242,254,0.4); } 
+        }
+
+        /* Dashboard Container with 3D Glassmorphism */
+        .box { width: 750px; background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 24px; backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.2); transform: rotateX(5deg) rotateY(-2deg); transition: transform 0.3s ease; }
+        .box:hover { transform: rotateX(0deg) rotateY(0deg); }
+        
+        h1 { font-size: 2.5rem; margin-top: 0; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 10px 20px rgba(0,242,254,0.2); }
+        
+        /* Stats Panel */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .stat-card h3 { margin: 0; font-size: 0.9rem; color: #8a8ab0; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card span { font-size: 1.8rem; font-weight: bold; color: #fff; display: block; margin-top: 5px; }
+
+        /* Typography & Interface */
+        #paragraph { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 20px; font-size: 22px; text-align: left; line-height: 38px; margin-bottom: 20px; border-radius: 12px; min-height: 80px; letter-spacing: 0.5px; }
+        textarea { width: 100%; height: 110px; font-size: 18px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; padding: 15px; box-sizing: border-box; resize: none; transition: all 0.3s ease; outline: none; }
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 254, 0.3); background: rgba(0,0,0,0.5); }
+
+        /* Status Colors - Matched Design Styles */
+        .correct { color: #00ff87; text-shadow: 0 0 8px rgba(0,255,135,0.8); font-weight: bold; }
+        .wrong { color: #ff0055; text-shadow: 0 0 8px rgba(255,0,85,0.8); font-weight: bold; }
+
+        button { margin-top: 25px; padding: 12px 35px; font-size: 18px; font-weight: bold; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; color: #0a0a16; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4); transition: all 0.3s ease; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 242, 254, 0.6); opacity: 0.95; }
+        button:active { transform: translateY(1px); }
+    </style>
+</head>
+<body>
+
+<!-- 3D Toy Objects -->
+<div class="toy toy1"></div>
+<div class="toy toy2"></div>
+<div class="toy toy3"></div>
+
+<div class="box">
+    <h1>Typing Speed Test</h1>
+    
+    <div class="stats-grid">
+        <div class="stat-card"><h3>Time Left</h3><span id="time">60</span></div>
+        <div class="stat-card"><h3>Speed</h3><span id="wpm">0</span> <small>WPM</small></div>
+        <div class="stat-card"><h3>Accuracy</h3><span id="accuracy">100</span>%</div>
+    </div>
+
+    <p id="paragraph"></p>
+    <textarea id="typingBox" placeholder="Type here... Press 'Enter' when finished to get a new text!"></textarea>
+    
+    <button onclick="restart()">Restart</button>
+    <br>
+
+    <button id="teamBtn" onclick="tName()">Team Members</button>
+    <br>
+    <ul id="team"></ul>
+
+
+</div>
+
+<script>
+
+    const teamMembers = ["Gautam Relan", "Uttam Prajapat", "Yugdipsinh Solanki", "Saransh Saxena", "Shalu Kumari", "Jatin Solanki"];
+    
+    function tName(){
+        var list = document.getElementById("team");
+        var button = document.getElementById("teamBtn"); // Fixed: Defined the button variable
+        
+        if (list.innerHTML === "") {
+            teamMembers.forEach(function(name) { // Fixed: Case matching variable
+                var childList = document.createElement('li');
+                childList.innerText = name;
+                list.appendChild(childList);
+            });
+            button.innerText = "Hide Team Members";
+        } else {
+            list.innerHTML = "";
+            button.innerText = "Team Members";
+        }
+    }
+
+
+// Pool of phrases that will change again and again
+const quotesPool = [
+    "The quick brown fox jumps over the lazy dog.",
+    "Coding is the closest thing we have to a superpower.",
+    "Actions speak louder than words, but typing shows your speed.",
+    "Consistency and practice will turn any beginner into a professional master.",
+    "Great things never came from comfort zones. Keep pushing your limits.",
+    "The beautiful thing about learning is that no one can take it away from you."
+];
+
+let text = "";
+let paragraph = document.getElementById("paragraph");
+let totalWordsTypedSoFar = 0; // Tracks past text blocks to accumulate WPM cleanly
+
+function loadNewText() {
+    paragraph.innerHTML = "";
+    // Pull a completely random quote from the pool
+    text = quotesPool[Math.floor(Math.random() * quotesPool.length)];
+    for(let i=0; i<text.length; i++){
+        paragraph.innerHTML += "<span>"+text[i]+"</span>";
+    }
+}
+
+// Load initial text block
+loadNewText();
+
+let timer = 60;
+let started = false;
+let interval;
+let input = document.getElementById("typingBox");
+
+input.addEventListener("keydown", function(e) {
+    // When user hits Enter, shift to a brand new text block dynamically
+    if (e.key === "Enter") {
+        e.preventDefault(); // Stop default enter linebreaks
+        let words = input.value.trim().split(" ");
+        totalWordsTypedSoFar += words.length; // Save historical data for speed calculations
+        input.value = ""; // Clear box
+        loadNewText(); // Update text
+    }
+});
+
+input.addEventListener("input", function(){
+    if(!started){
+        started = true;
+        startTimer();
+    }
+
+    let typed = input.value;
+    let spans = paragraph.querySelectorAll("span");
+    let correct = 0;
+
+    for(let i=0;i<spans.length;i++){
+        spans[i].className="";
+        if(typed[i]==null){
+            // do nothing
+        } else if(typed[i]==text[i]){
+            spans[i].className="correct";
+            correct++;
+        } else {
+            spans[i].className="wrong";
+        }
+    }
+
+    if(typed.length>0){
+        if(typed[0] != text[0]){
+            spans[0].className="wrong";
+        }
+    }
+
+    let accuracy = 100;
+    if(typed.length>0){
+        accuracy = Math.round((correct/typed.length)*100);
+    }
+    document.getElementById("accuracy").innerHTML = accuracy;
+});
+
+function startTimer(){
+    interval = setInterval(function(){
+        timer--;
+        document.getElementById("time").innerHTML = timer;
+        
+        let words = input.value.trim().split(" ");
+        let totalWords = totalWordsTypedSoFar + (input.value.trim() === "" ? 0 : words.length);
+        let wpm = Math.round(totalWords*(60/(60-timer)));
+
+        if(timer!=60)
+            document.getElementById("wpm").innerHTML = wpm;
+
+        if(timer==0){
+            clearInterval(interval);
+            input.disabled = true;
+        }
+    },1000);
+}
+
+function restart(){
+    location.reload();
+}
+</script>
+
+</body>
+</html>
